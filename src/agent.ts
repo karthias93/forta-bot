@@ -22,7 +22,7 @@ const handleTransaction: HandleTransaction = async (
   txEvent: TransactionEvent
 ) => {
   const findings: Finding[] = [];
-
+  console.log(findingsCount, '=====count------')
   // limiting this agent to emit only 5 findings so that the alert feed is not spammed
   if (findingsCount >= 5) return findings;
   // filter the transaction logs for Tether transfer events
@@ -30,19 +30,17 @@ const handleTransaction: HandleTransaction = async (
     ERC20_TRANSFER_EVENT
   );
 
-  tetherTransferEvents.forEach(async (transferEvent) => {
+  // tetherTransferEvents.forEach((transferEvent) => {
+  for (const transferEvent of tetherTransferEvents) {
     // extract transfer event arguments
     const { to, from, value } = transferEvent.args;
-    console.log(from, '-----from-------')
     const firstRecord = await axios.get(`https://api.etherscan.io/api?module=account&action=txlist&address=${from}&startblock=0&endblock=99999999&page=1&offset=1&sort=asc&apikey=IFHFS4XF4RGGW4F99FHIQG2AJF7AV6IW2D`)
     const firstIn = firstRecord?.data?.result && firstRecord.data.result.length ? firstRecord.data.result[0].timeStamp : '0';
     if (firstIn) {
-      console.log(firstIn, "------------Wallet Age-----------------------");
       const datediff = (first: any, second: any)  => {   
         return Math.round((first - second) / (60 * 60 * 24));
       }
-      const diff = datediff(Math.round(Date.now()/1000), firstIn)
-      console.log(diff, '------diff------')
+      const diff = datediff(Math.round(Date.now()/1000), firstIn);
       let message = '';
       let type = 'Wallet';
       if (diff <= 1) {
@@ -53,6 +51,7 @@ const handleTransaction: HandleTransaction = async (
           message = `New Wallet interacted between age 7 days - 30 days. Check Address`;
       }
       if (message) {
+        console.log(message, '-------message-------')
         findings.push(
           Finding.fromObject({
             name: "New Wallet interacted",
@@ -69,8 +68,8 @@ const handleTransaction: HandleTransaction = async (
         findingsCount++;
       }
     }
-  });
-
+  }
+  console.log(findings, '------f----------')
   return findings;
 };
 
