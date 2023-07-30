@@ -22,19 +22,25 @@ const handleTransaction: HandleTransaction = async (
   txEvent: TransactionEvent
 ) => {
   const findings: Finding[] = [];
-  console.log(findingsCount, '=====count------')
   // limiting this agent to emit only 5 findings so that the alert feed is not spammed
   if (findingsCount >= 5) return findings;
   // filter the transaction logs for Tether transfer events
+  const protocol = txEvent.network;
+  const blockNumber = txEvent.blockNumber;
+  const timeStamp = txEvent.timestamp;
+  const hash = txEvent.hash;
+  console.log(protocol, '-------tr event----------', blockNumber, '-------', timeStamp, '------', hash)
   const tetherTransferEvents = txEvent.filterLog(
     ERC20_TRANSFER_EVENT
   );
-
-  // tetherTransferEvents.forEach((transferEvent) => {
   for (const transferEvent of tetherTransferEvents) {
-    // extract transfer event arguments
+   
+  //   // extract transfer event arguments
     const { to, from, value } = transferEvent.args;
-    const firstRecord = await axios.get(`https://api.etherscan.io/api?module=account&action=txlist&address=${from}&startblock=0&endblock=99999999&page=1&offset=1&sort=asc&apikey=IFHFS4XF4RGGW4F99FHIQG2AJF7AV6IW2D`)
+    const address = transferEvent.address;
+    let url = `https://api.etherscan.io/api?module=account&action=txlist&address=${from}&startblock=0&endblock=99999999&page=1&offset=1&sort=asc&apikey=IFHFS4XF4RGGW4F99FHIQG2AJF7AV6IW2D`;
+    if (protocol !== 1) url = `https://api.bscscan.io/api?module=account&action=txlist&address=${from}&startblock=0&endblock=99999999&page=1&offset=1&sort=asc&apikey=VRWQ7X5FHH3X38IDB5VJB2Z69A46849CYH`;
+    const firstRecord = await axios.get(url)
     const firstIn = firstRecord?.data?.result && firstRecord.data.result.length ? firstRecord.data.result[0].timeStamp : '0';
     if (firstIn) {
       const datediff = (first: any, second: any)  => {   
@@ -51,7 +57,6 @@ const handleTransaction: HandleTransaction = async (
           message = `New Wallet interacted between age 7 days - 30 days. Check Address`;
       }
       if (message) {
-        console.log(message, '-------message-------')
         findings.push(
           Finding.fromObject({
             name: "New Wallet interacted",
@@ -62,6 +67,11 @@ const handleTransaction: HandleTransaction = async (
             metadata: {
               to,
               from,
+              address,
+              type,
+              blockNumber: blockNumber.toString(),
+              timeStamp: timeStamp.toString(),
+              hash
             },
           })
         );
@@ -69,7 +79,7 @@ const handleTransaction: HandleTransaction = async (
       }
     }
   }
-  console.log(findings, '------f----------')
+  // console.log(findings, '------f----------')
   return findings;
 };
 
