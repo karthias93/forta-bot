@@ -57,24 +57,30 @@ const handleTransaction: HandleTransaction = async (
           message = `New Wallet interacted between age 7 days - 30 days. Check Address`;
       }
       if (message) {
+        const responseData = {
+          name: "New Wallet interacted",
+          description: message,
+          alertId: "FORTA-1",
+          severity: FindingSeverity.Low,
+          type: FindingType.Info,
+          metadata: {
+            to,
+            from,
+            address,
+            type,
+            blockNumber: blockNumber.toString(),
+            timeStamp: timeStamp.toString(),
+            hash
+          },
+        };
         findings.push(
-          Finding.fromObject({
-            name: "New Wallet interacted",
-            description: message,
-            alertId: "FORTA-1",
-            severity: FindingSeverity.Low,
-            type: FindingType.Info,
-            metadata: {
-              to,
-              from,
-              address,
-              type,
-              blockNumber: blockNumber.toString(),
-              timeStamp: timeStamp.toString(),
-              hash
-            },
-          })
+          Finding.fromObject(responseData)
         );
+        try {
+          await axios.post(`https://dashboard.dehack.ai/api/webhook`, Finding.fromObject(responseData));
+        } catch(e) {
+          console.log(e, '----err-----')
+        }
         findingsCount++;
       }
     }
