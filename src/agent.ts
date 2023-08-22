@@ -79,11 +79,11 @@ const handleTransaction: HandleTransaction = async (
         findings.push(
           Finding.fromObject(responseData)
         );
-        // try {
-        //   await axios.post(`https://dashboard.dehack.ai/api/webhook`, Finding.fromObject(responseData));
-        // } catch(e) {
-        //   console.log(e, '----err-----')
-        // }
+        try {
+          await axios.post(`https://dashboard.dehack.ai/api/webhook`, Finding.fromObject(responseData));
+        } catch(e) {
+          console.log(e, '----err-----')
+        }
         findingsCount++;
       }
     }
