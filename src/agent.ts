@@ -11,6 +11,9 @@ import {
   FindingType,
 } from "forta-agent";
 import axios from 'axios';
+// import { getFlashloans as getFlashloansFn } from "./flashloan-detector";
+// import helperModule from "./helper";
+// import { PersistenceHelper } from "./persistence.helper";
 
 export const ERC20_TRANSFER_EVENT =
   "event Transfer(address indexed from, address indexed to, uint256 value)";
@@ -76,9 +79,9 @@ const handleTransaction: HandleTransaction = async (
             hash
           },
         };
-        findings.push(
-          Finding.fromObject(responseData)
-        );
+        // findings.push(
+        //   Finding.fromObject(responseData)
+        // );
         try {
           await axios.post(`https://dashboard.dehack.ai/api/webhook`, Finding.fromObject(responseData));
         } catch(e) {
