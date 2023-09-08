@@ -50,6 +50,7 @@ const handleTransaction: HandleTransaction = async (
   //   // extract transfer event arguments
     const { to, from, value } = transferEvent.args;
     const address = transferEvent.address;
+    console.log(validAddress, '--------valid address----')
     if (updatedAddress.includes(address) || !validAddress.includes(address)) return;
     updatedAddress.push(address)
     let url = `https://api.etherscan.io/api?module=account&action=txlist&address=${from}&startblock=0&endblock=99999999&page=1&offset=1&sort=asc&apikey=IFHFS4XF4RGGW4F99FHIQG2AJF7AV6IW2D`;
@@ -132,7 +133,7 @@ const handleBlock: HandleBlock = async (blockEvent: BlockEvent) => {
   const findings: Finding[] = [];
   // detect some block condition
   const query = util.promisify(db.query).bind(db);
-  const result = await query("SELECT contractAddress FROM contracts WHERE chain='BSC'");
+  const result = await query("SELECT contractAddress FROM contracts WHERE chain='ETH'");
   validAddress = result.map((address: any)=>address.contractAddress)
   return findings;
 }
