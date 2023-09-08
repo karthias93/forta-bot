@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "forta-agent": "^0.1.33",
+    "mysql": "^2.18.1",
     "web3": "^4.1.1"
   },
   "devDependencies": {
